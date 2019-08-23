@@ -3,8 +3,11 @@ class IDE {
     this.root = document.getElementById("root");
     this.template = `
       <div id="ide">
-        <div class="ide_title><h1>Mu IDE</h1></div>
+        <div class="ide_title">
+          <h1>Mu IDE</h1>
+        </div>
         <div class="ide_editor" contenteditable=true></div>
+        <button class="ide_button">编译</button>
       </div>
     ` 
     this.root.insertAdjacentHTML("beforeend", this.template);
@@ -12,8 +15,8 @@ class IDE {
   }
 
   getContent() {
-    return "hello world"
+    return "hello world";
   }
 }
 
-export default IDE
+export default IDE;
