@@ -8,14 +8,21 @@ export class Token {
 
 export class Lexer {
   constructor(sourceCode) {
-    this.initTokenTypes()
+    this.initTokenTypeTable()
+    this.initKeywordTable()
     this.sourceCode = sourceCode
     this.position = 0
     this.lineno = 0
     this.ch = ''
+
+    // 当前正在被解析的token的位置
+    this.currTokBegin = 0
+    this.currTokEnd = 0
+
+    this.observers = new Set()
   }
 
-  initTokenTypes() {
+  initTokenTypeTable() {
     this.ILLEGAL = -2
     this.EOF = -1
     this.LET = 0
@@ -24,8 +31,40 @@ export class Lexer {
     this.PLUS_SIGN = 3
     this.INTEGER = 4
     this.SEMICOLON = 5
+    this.IF = 6
+    this.ELSE = 7
+    this.tokenTypes = new Map([
+      [this.ILLEGAL, "ILLEGAL"],
+      [this.EOF, "EOF"],
+      [this.LET, "LET"],
+      [this.IDENTIFIER, "IDENTIFIER"],
+      [this.EQUAL_SIGN, "EQUAL_SIGN"],
+      [this.PLUS_SIGN, "PLUS_SIGN"],
+      [this.INTEGER, "INTEGER"],
+      [this.SEMICOLON, "SEMICOLON"],
+      [this.IF, "IF"],
+      [this.ELSE, "ELSE"],
+    ])
   }
 
+  initKeywordTable() {
+    this.keywords = new Map([
+      ["let", this.LET],
+      ["if", this.IF],
+      ["else", this.ELSE]
+    ])
+  }
+
+  // 注册一个观察者对象，每解析一个token会调用observer的notify方法
+  registerObserver(observer) {
+    if (!this.observers.has(observer)) {
+      this.observers.add(observer)
+    }
+  }
+
+  getTypeDescription(type) {
+    return this.tokenTypes.get(type)
+  }
   // 读取当前position位置的字符但不消耗字符
   peekChar() {
     if (this.position >= this.sourceCode.length) {
@@ -39,6 +78,7 @@ export class Lexer {
   readChar() {
     this.ch = this.peekChar()
     this.position += 1
+    this.currTokEnd += 1
   }
 
   // 忽略空白符
@@ -73,6 +113,8 @@ export class Lexer {
 
     let c = this.peekChar()
     let lineno = this.lineno
+    // 左闭右开区间
+    this.currTokBegin = this.currTokEnd = this.position
     let tok
 
     if (c === '+') {
@@ -94,8 +136,14 @@ export class Lexer {
       }
     }
 
-    if (tok === null || tok === undefined) {
-      throw new Error("无法解析单词")
+    if (tok !== null && tok !== undefined) {
+      // 通知所有注册的观察者已经解析完的一个token
+      // 以及token在源码中的开始和结束为止
+      this.observers.forEach((o) => {
+        o.notify(tok, this.currTokBegin, this.currTokEnd)
+      })
+    } else {
+      throw new Error(`无法解析单词, lineno:${this.lineno}`)
     }
 
     return tok
@@ -126,10 +174,24 @@ export class Lexer {
       c = this.peekChar()
     }
     if (str !== '') {
-      tok = new Token(this.IDENTIFIER, str, this.lineno)
+      let keyword = this.searchKeywordTable(str)
+      if (keyword === null) {
+        tok = new Token(this.IDENTIFIER, str, this.lineno)
+      } else {
+        tok = keyword
+      }
     }
     return tok
 
+  }
+
+  searchKeywordTable(word) {
+    let keywordType = this.keywords.get(word)
+    if (keywordType === undefined || keywordType === null) {
+      return null
+    } else {
+      return new Token(keywordType, word, this.lineno)
+    }
   }
 
   lexing() {
