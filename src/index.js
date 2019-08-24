@@ -1,5 +1,6 @@
 import IDE from './IDE';
 import './index.scss';
 
-new IDE();
+let ide = new IDE();
+ide.compile()
 
