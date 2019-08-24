@@ -1,13 +1,27 @@
+* {
+  margin: 0px;
+  padding: 0px;
+}
 #ide {
-  .ide_editor {
-    width: 600px;
+  .ide_title {
+    text-align: center;
+    padding: 20px;
+  }
+  .ide_editor, .ide_console {
+    display: inline-block;
+    vertical-align: top;
+    width: 40%;
     height: 500px;
+    margin-left: 5%;
     border: 1px solid grey;
   }
   .ide_button {
     width: 100px;
     height: 50px;
-    margin-top: 20px;
+    margin: {
+      left: 4%;
+      top: 20px;
+    }
     background: blue;
     color: white;
     font-size: 15px;

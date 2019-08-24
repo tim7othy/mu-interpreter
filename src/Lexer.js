@@ -93,7 +93,6 @@ export class Lexer {
         tok = this.readIdentifier()
       }
     }
-    console.log(tok)
 
     if (tok === null || tok === undefined) {
       throw new Error("无法解析单词")
@@ -110,7 +109,6 @@ export class Lexer {
       str += c
       this.readChar()
       c = this.peekChar()
-      console.log(c)
     }
     if (str !== '') {
       tok = new Token(this.INTEGER, parseInt(str), this.lineno)
