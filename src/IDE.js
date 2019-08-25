@@ -23,6 +23,7 @@ class IDE {
     this.console = this.elem.getElementsByClassName("ide_console")[0]
     this.btn = this.elem.getElementsByClassName("ide_button")[0]
     this.bindEvents()
+    this.initLexer()
     this.initObservers()
   }
 
@@ -33,6 +34,64 @@ class IDE {
     window.addEventListener("keyup", (ev) => {
       this.compile()
     })
+    // this.console.addEventListener("mouseout", (ev) => {
+    //   let t = ev.target
+    //   if (t.tagName.toLowerCase() === "span" && t === this.pointedSpan) {
+    //     let matchObj = t.className.match(/code-([0-9]+)/)
+    //     if (matchObj) {
+    //       this.hidePopup()
+    //     }
+    //   }
+    // })
+    this.console.addEventListener("mouseover", (ev) => {
+      let t = ev.target
+      let rt = ev.relatedTarget
+      // console.log(`target: ${t.tagName}`)
+      // console.log(`relatedTarget: ${rt.tagName}`)
+      if (t.tagName.toLowerCase() === "span") {
+        let matchObj = t.className.match(/code-([0-9]+)/)
+        if (matchObj) {
+          let type = parseInt(matchObj[1])
+          let description = this.lexer.getTypeDescription(type)
+          let bounding = t.getBoundingClientRect()
+          this.popup(bounding.x, bounding.y, description)
+        } else {
+          this.hidePopup()
+        }
+      } else {
+        this.hidePopup()
+      }
+    }, true)
+  }
+
+  popup(x, y, content) {
+    if (!this.popupDiv) {
+      let p = `
+        <div class="popup-tip">
+          <div class="popup-title">tips</div>
+          <div class="popup-content">
+            ${content}
+          </div>
+        </div>
+      `
+      this.console.insertAdjacentHTML("afterend", p)
+      this.popupDiv = document.getElementsByClassName("popup-tip")[0]
+    } else {
+      this.popupDiv.querySelector(".popup-content").innerText = content
+    }
+    this.popupDiv.style.visibility = "visible"
+    this.popupDiv.style.left = x + "px"
+    this.popupDiv.style.top = y + 30 + "px"
+  }
+
+  hidePopup() {
+    if (this.popupDiv) {
+      this.popupDiv.style.visibility = "hidden"
+    }
+  }
+
+  initLexer() {
+    this.lexer = new Lexer("")
   }
 
   _changeWhiteChars(str) {
@@ -60,8 +119,6 @@ class IDE {
     this.keywordHighlightObserver = {
       notify: (tok, begin, end) => {
         // 该关键字和上一个关键字之间的普通代码片段
-        // console.log(`${begin}: ${end},`)
-        // console.log(`lastFragmentEnd: ${this.lastFragmentEnd}`)
         if (this.lastFragmentEnd < begin) {
           let spaceText = this.getContent().substring(this.lastFragmentEnd, begin)
           let converted = this._changeWhiteChars(spaceText)
@@ -88,6 +145,7 @@ class IDE {
         }
       }
     }
+    this.lexer.registerObserver(this.keywordHighlightObserver)
   }
 
   getContent() {
@@ -117,9 +175,8 @@ class IDE {
 
   compile() {
     let code = this.getContent()
-    let lexer = new Lexer(code)
-    lexer.registerObserver(this.keywordHighlightObserver)
-    let tokens = lexer.lexing()
+    this.lexer.updateSourceCode(code)
+    let tokens = this.lexer.lexing()
     this.render_content()
   }
 }

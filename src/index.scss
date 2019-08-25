@@ -2,6 +2,9 @@
   margin: 0px;
   padding: 0px;
 }
+#root {
+  position: relative;
+}
 #ide {
   .ide_title {
     text-align: center;
@@ -20,6 +23,13 @@
     span {
       font-size: 18px;
     }
+  }
+  .popup-tip {
+    width: 200px;
+    height: 100px;
+    position: absolute;
+    background: "#555";
+    border: 1px solid black;
   }
   .ide_button {
     width: 100px;

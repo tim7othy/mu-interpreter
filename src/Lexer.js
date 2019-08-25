@@ -10,15 +10,7 @@ export class Lexer {
   constructor(sourceCode) {
     this.initTokenTypeTable()
     this.initKeywordTable()
-    this.sourceCode = sourceCode
-    this.position = 0
-    this.lineno = 0
-    this.ch = ''
-
-    // 当前正在被解析的token的位置
-    this.currTokBegin = 0
-    this.currTokEnd = 0
-
+    this.updateSourceCode(sourceCode)
     this.observers = new Set()
   }
 
@@ -64,6 +56,17 @@ export class Lexer {
 
   getTypeDescription(type) {
     return this.tokenTypes.get(type)
+  }
+
+  updateSourceCode(code) {
+    this.sourceCode = code
+    this.position = 0
+    this.lineno = 0
+    this.ch = ''
+
+    // 当前正在被解析的token的位置
+    this.currTokBegin = 0
+    this.currTokEnd = 0
   }
   // 读取当前position位置的字符但不消耗字符
   peekChar() {
