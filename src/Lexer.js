@@ -84,7 +84,8 @@ export class Lexer {
   // 忽略空白符
   skipWhiteChars() {
     let c = this.peekChar()
-    while (c === ' ' || c === '\n' || c === '\t') {
+    // 检测是否为空白符（html中的空格可能以&nbsp;的实体编码形式呈现，普通字符串比较无法识别）
+    while (c && (c.charCodeAt(0) === 160 || c === ' ' || c === '\n' || c === '\t')) {
       if (c === '\n' || c === '\t') {
         this.lineno += 1
       }

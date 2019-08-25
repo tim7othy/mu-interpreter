@@ -9,7 +9,8 @@ class IDE {
           <h1>Mu IDE</h1>
         </div>
         <div class="ide_main">
-          <div class="ide_editor" contenteditable=true></div>
+          <div class="ide_editor" contenteditable=true>
+          </div>
           <div class="ide_console"></div>
         </div>
         <button class="ide_button">编译</button>
@@ -18,6 +19,7 @@ class IDE {
     this.root.insertAdjacentHTML("beforeend", this.template);
     this.elem = document.getElementById("ide");
     this.editor = this.elem.getElementsByClassName("ide_editor")[0]
+    this.content = this.elem.getElementsByClassName("ide_rendered_content")[0]
     this.console = this.elem.getElementsByClassName("ide_console")[0]
     this.btn = this.elem.getElementsByClassName("ide_button")[0]
     this.bindEvents()
@@ -28,10 +30,17 @@ class IDE {
     this.btn.addEventListener("click", () => {
       this.compile()      
     })
+    window.addEventListener("keyup", (ev) => {
+      this.compile()
+    })
   }
 
   _changeWhiteChars(str) {
+    // 只有一个连续空格的时候需要将空格转为实体编码，否则会被浏览器吞掉
+    // 多个连续空格的时候contenteditable的div会自行转换空格，因此不需要转换
     var s = ""
+    if (str.length > 1)
+      return str
     for (var i = 0; i < str.length; i++) {
       if (str[i] === ' ') {
         s += '\u00a0'
@@ -85,17 +94,33 @@ class IDE {
     return this.editor.innerText
   }
 
+  _clearTextNodes(node) {
+    let childs = node.childNodes
+    for (let i = 0; i < childs.length; i++) {
+      // 循环到文本或空子节点就删除
+      let c = childs[i]
+      if (c.nodeName === "#text" && !/\s/.test(c.nodeValue)) {
+        node.removeChild(c)
+      }
+    }
+  }
+
+  render_content() {
+    let content = this.fragments.join("")
+    // let contentDiv = `
+    //   <p class="ide_rendered_content">${content}</p>
+    // `
+    // this._clearTextNodes(this.editor)
+    this.console.innerHTML = content
+    this.fragments = []
+  }
+
   compile() {
     let code = this.getContent()
     let lexer = new Lexer(code)
     lexer.registerObserver(this.keywordHighlightObserver)
     let tokens = lexer.lexing()
-    console.log(this.fragments)
-    this.console.innerHTML = this.fragments.join("")
-  }
-
-  test() {
-    return 'ok!'
+    this.render_content()
   }
 }
 

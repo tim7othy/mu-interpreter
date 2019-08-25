@@ -15,6 +15,12 @@
     margin-left: 5%;
     border: 1px solid grey;
   }
+  .ide_console {
+    font-size: 0px;
+    span {
+      font-size: 18px;
+    }
+  }
   .ide_button {
     width: 100px;
     height: 50px;
