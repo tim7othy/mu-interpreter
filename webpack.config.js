@@ -1,6 +1,6 @@
 const path = require('path')
-const HtmlWebpackPlug = require('html-webpack-plugin')
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const webpack = require('webpack')
 
 module.exports = {
@@ -41,7 +41,7 @@ module.exports = {
     ]
   },
   devServer: {
-    contentBase: [path.join(__dirname, 'public'), path.join(__dirname, 'dist')]， // 访问url域名对应的根目录
+    contentBase: [path.join(__dirname, 'public'), path.join(__dirname, 'dist')],// 访问url域名对应的根目录
     open: true, // 打开浏览器，访问当前服务器
     port: 5000, // 服务器绑定端口
     host: 'localhost', // 服务器运行ip
