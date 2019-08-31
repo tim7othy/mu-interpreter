@@ -7,6 +7,14 @@ import {
     is_whitespace
 } from './utils'
 
+export class Token {
+    constructor(type, value, pos) {
+        this.type = type
+        this.value = value
+        this.pos = pos
+    }
+}
+
 export class Tokenizer {
     constructor(input) {
         this.input = input
@@ -18,7 +26,8 @@ export class Tokenizer {
     read_next() {
         this.read_while(is_whitespace)
         if (this.input.eof()) return null
-        let ch = this.input.peek()
+        const ch = this.input.peek()
+        const pos = this.input.pos
         if (ch === '#') {
             this.skip_comment()
             return this.read_next()
@@ -26,14 +35,8 @@ export class Tokenizer {
         if (ch === '"') return this.read_string()
         if (is_digit(ch)) return this.read_number()
         if (is_id_start(ch)) return this.read_identifier()
-        if (is_op_char(ch)) return {
-            type: "op",
-            value: this.read_while(is_op_char)
-        }
-        if (is_punc(ch)) return {
-            type: "punc",
-            value: this.input.next()
-        }
+        if (is_op_char(ch)) return new Token("op", this.read_while(is_op_char), pos)
+        if (is_punc(ch)) return new Token("punc", this.input.next(), pos)
         this.input.error("can't handle character " + ch)
     }
 
@@ -56,8 +59,8 @@ export class Tokenizer {
         this.input.next();
     }
 
-
     read_number() {
+        const pos = this.input.pos
         // 标志已经读取过一个"."
         let has_dot = false
         let str = this.read_while((ch) => {
@@ -71,17 +74,12 @@ export class Tokenizer {
             }
             return is_digit(ch)
         })
-        return {
-            type: "num",
-            value: parseFloat(str)
-        }
+        return new Token("num", parseFloat(str), pos)
     }
 
     read_string() {
-        return {
-            type: "str",
-            value: this.read_escaped()
-        }
+        const pos = this.input.pos
+        return new Token("str", this.read_escaped(), pos)
     }
 
     // 读取可能包含转移符的字符串
@@ -112,13 +110,11 @@ export class Tokenizer {
     }
 
     read_identifier() {
+        const pos = this.input.pos
         let keywords = " if then else lambda λ true false ";
         let id = this.read_while(is_id)
         let is_keyword  = (x) => keywords.indexOf(" " + x + " ") >= 0
-        return {
-            type: is_keyword(id) ? "kw" : "var",
-            value: id
-        }
+        return new Token(is_keyword(id) ? "kw" : "var", id, pos)
     }
 
     next() {

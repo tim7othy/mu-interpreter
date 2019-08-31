@@ -1,5 +1,8 @@
 export class InputSystem {
   constructor(code) {
+      this.updateCode(code)
+  }
+  updateCode(code) {
     this.code = code
     this.line = 0
     this.col = 0
