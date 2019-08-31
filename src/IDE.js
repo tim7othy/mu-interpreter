@@ -3,11 +3,11 @@ import {
 } from './Lexer';
 import '@babel/polyfill';
 import {
-    Tokenizer
-} from './Tokenizer';
-import {
     InputSystem
 } from './Input';
+import {
+    Parser
+} from './Parser'
 class IDE {
     constructor() {
         this.root = document.getElementById("root");
@@ -31,7 +31,8 @@ class IDE {
         this.console = this.elem.getElementsByClassName("ide_console")[0]
         this.btn = this.elem.getElementsByClassName("ide_button")[0]
         this.input = new InputSystem("")
-        this.lexer = new Lexer(new Tokenizer(this.input))
+        this.lexer = new Lexer(this.input)
+        this.parser = new Parser(this.lexer)
         this.bindEvents()
         this.initObservers()
     }
@@ -41,7 +42,7 @@ class IDE {
             this.compile()
         })
         window.addEventListener("keyup", (ev) => {
-            this.compile()
+            this.lexing()
         })
         // this.console.addEventListener("mouseout", (ev) => {
         //   let t = ev.target
@@ -178,10 +179,18 @@ class IDE {
         this.fragments = []
     }
 
-    compile() {
+    lexing() {
         let code = this.getContent()
         this.input.updateCode(code)
         let tokens = this.lexer.lexing()
+        this.render_content()
+    }
+
+    compile() {
+        let code = this.getContent()
+        this.input.updateCode(code)
+        // let tokens = this.lexer.lexing()
+        let prog = this.parser.parse_toplevel()
         this.render_content()
     }
 }
