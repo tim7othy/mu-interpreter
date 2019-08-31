@@ -1,4 +1,4 @@
-class InputSystem {
+export class InputSystem {
   constructor(code) {
     this.code = code
     this.line = 0
@@ -21,7 +21,7 @@ class InputSystem {
   eof() {
     // 字符数组索引超过下标时会返回undefined
     // 如果使用charAt，则索引超过下标时会返回""
-    let ch = peek()
+    let ch = this.peek()
     return ch ==="" || ch === undefined
   }
   error(msg) {
