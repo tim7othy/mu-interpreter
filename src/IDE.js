@@ -63,8 +63,11 @@ class IDE {
                 let matchObj = t.className.match(/code-(\w+)/)
                 if (matchObj) {
                     let type = matchObj[1]
-                    let bounding = t.getBoundingClientRect()
-                    this.popup(bounding.x, bounding.y, type)
+                    if (type === "var" || type === "num" || type === "str") {
+                        let bounding = t.getBoundingClientRect()
+                        let v = t.dataset.value
+                        this.popup(bounding.x, bounding.y, `token类型：${type}\ntoken值：${v}`)
+                    }
                 } else {
                     this.hidePopup()
                 }
@@ -143,6 +146,13 @@ class IDE {
           `
                     this.fragments.push(keywordFragment)
                     this.lastFragmentEnd = end
+                } else if (["var", "num", "str"].includes(tok.type)) {
+                    let varFragment = `
+            <span class="code-${tok.type}" data-value="${tok.value}">${text}</span>
+          `
+                    this.fragments.push(varFragment)
+                    this.lastFragmentEnd = end
+
                 } else {
                     let plainFragment = `
             <span class="code-${tok.type}">${text}</span>
