@@ -122,7 +122,7 @@ export class Lexer {
         const pos = this.input.pos
         let keywords = " if then else lambda λ true false ";
         let id = this.read_while(is_id)
-        let is_keyword  = (x) => keywords.indexOf(" " + x + " ") >= 0
+        let is_keyword = (x) => keywords.indexOf(" " + x + " ") >= 0
         return new Token(is_keyword(id) ? "kw" : "var", id, pos)
     }
 

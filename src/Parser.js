@@ -30,6 +30,7 @@ export class Parser {
     }
 
     parse_atom() {
+        return this.expect_call(() => {
             if (this.is_tok("punc", "(")) {
                 this.lexer.next();
                 var exp = this.parse_expression();
@@ -47,6 +48,8 @@ export class Parser {
             if (tok.type == "var" || tok.type == "num" || tok.type == "str")
                 return tok;
             this.unexpected();
+
+        })
     }
 
     parse_expression() {
@@ -62,7 +65,6 @@ export class Parser {
 
     expect_binary(left, prec) {
         if (this.is_tok("op")) {
-            console.log("executed")
             const op = this.lexer.peek()
             const right_prec = this.PRECEDENCE[op.value]
             const left_prec = prec
@@ -126,7 +128,6 @@ export class Parser {
     parse_if() {
         this.skip_tok("kw", "if");
         var cond = this.parse_expression();
-        console.log(cond)
         if (!this.is_tok("punc", "{")) this.skip_tok("kw", "then");
         var then = this.parse_expression();
         var ret = {
@@ -138,6 +139,7 @@ export class Parser {
             this.lexer.next();
             ret.else = this.parse_expression();
         }
+        console.log(ret)
         return ret;
     }
 

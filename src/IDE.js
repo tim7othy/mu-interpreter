@@ -8,6 +8,7 @@ import {
 import {
     Parser
 } from './Parser'
+import {evaluate, Environment} from './Interpreter'
 class IDE {
     constructor() {
         this.root = document.getElementById("root");
@@ -187,11 +188,12 @@ class IDE {
     }
 
     compile() {
-        let code = this.getContent()
+        const code = this.getContent()
         this.input.updateCode(code)
-        // let tokens = this.lexer.lexing()
-        let prog = this.parser.parse_toplevel()
-        this.render_content()
+        const ast = this.parser.parse_toplevel()
+        const glob_env = new Environment()
+        const result = evaluate(ast, glob_env)
+        console.log(result)
     }
 }
 
