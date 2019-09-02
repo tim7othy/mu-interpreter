@@ -8,55 +8,65 @@ import {
 import {
     Parser
 } from './Parser'
-import {evaluate, Environment} from './Interpreter'
+import {
+    evaluate,
+    Environment
+} from './Interpreter'
 class IDE {
     constructor() {
-        this.root = document.getElementById("root");
+        this.root = document.querySelector("#root");
         this.template = `
-      <div id="ide">
-        <div class="ide_title">
-          <h1>Mu IDE</h1>
-        </div>
-        <div class="ide_main">
-          <div class="ide_editor" contenteditable=true>
-          </div>
-          <div class="ide_console"></div>
-        </div>
-        <button class="ide_button">编译</button>
-      </div>
-    `
+            <div id="ide">
+                <div class="ide_header">
+                    <h1 class="ide_title">Mu IDE</h1>
+                    <div class="ide_button">编译</div>
+                </div>
+                <div class="ide_main">
+                    <div class="ide_editor" contenteditable=true>
+                    </div>
+                    <div class="ide_display"></div>
+                </div>
+                <div class="ide_console_wrapper">
+                    <div class="ide_console_title"> 输出 </div>
+                    <div class="ide_console"></div>
+                </div>
+            </div>
+        `
         this.root.insertAdjacentHTML("beforeend", this.template);
-        this.elem = document.getElementById("ide");
-        this.editor = this.elem.getElementsByClassName("ide_editor")[0]
-        this.content = this.elem.getElementsByClassName("ide_rendered_content")[0]
-        this.console = this.elem.getElementsByClassName("ide_console")[0]
-        this.btn = this.elem.getElementsByClassName("ide_button")[0]
+        this.elem = document.querySelector("#ide");
+        this.editor = this.elem.querySelector(".ide_editor")
+        this.editor.innerHTML = `
+            <div>println("Hello World!");</div><br>
+
+            <div># this is a comment</div><br>
+
+            <div>println(2 + 3 * 4);</div><br>
+
+            <div>fib = lambda (n) if n < 2 then n else fib(n - 1) + fib(n - 2);</div><br>
+
+            <div>fib(15);</div><br>
+        `
+        this.display = this.elem.querySelector(".ide_display")
+        this.console = this.elem.querySelector(".ide_console")
+        this.btn = this.elem.querySelector(".ide_button")
         this.input = new InputSystem("")
         this.lexer = new Lexer(this.input)
         this.parser = new Parser(this.lexer)
         this.bindEvents()
         this.initObservers()
+        this.lexing()
     }
 
     bindEvents() {
         this.btn.addEventListener("click", () => {
+            this.console.innerText = ""
             this.compile()
         })
         window.addEventListener("keyup", (ev) => {
             this.lexing()
         })
-        // this.console.addEventListener("mouseout", (ev) => {
-        //   let t = ev.target
-        //   if (t.tagName.toLowerCase() === "span" && t === this.pointedSpan) {
-        //     let matchObj = t.className.match(/code-([0-9]+)/)
-        //     if (matchObj) {
-        //       this.hidePopup()
-        //     }
-        //   }
-        // })
-        this.console.addEventListener("mouseover", (ev) => {
+        this.display.addEventListener("mouseover", (ev) => {
             let t = ev.target
-            let rt = ev.relatedTarget
             // console.log(`target: ${t.tagName}`)
             // console.log(`relatedTarget: ${rt.tagName}`)
             if (t.tagName.toLowerCase() === "span") {
@@ -87,7 +97,7 @@ class IDE {
           </div>
         </div>
       `
-            this.console.insertAdjacentHTML("afterend", p)
+            this.display.insertAdjacentHTML("afterend", p)
             this.popupDiv = document.getElementsByClassName("popup-tip")[0]
         } else {
             this.popupDiv.querySelector(".popup-content").innerText = content
@@ -104,15 +114,14 @@ class IDE {
     }
 
     _changeWhiteChars(str) {
-        // 只有一个连续空格的时候需要将空格转为实体编码，否则会被浏览器吞掉
-        // 多个连续空格的时候contenteditable的div会自行转换空格，因此不需要转换
         var s = ""
-        if (str.length > 1)
-            return str
+        if (str.length === 1 && str === ' ') {
+            // 只有一个连续空格的时候需要将空格转为实体编码，否则会被浏览器吞掉
+            // 多个连续空格的时候contenteditable的div会自行转换空格，因此不需要转换
+            return '\u00a0'
+        }
         for (var i = 0; i < str.length; i++) {
-            if (str[i] === ' ') {
-                s += '\u00a0'
-            } else if (str[i] === '\n') {
+            if (str[i] === '\n') {
                 s += '<br>'
             } else {
                 s += str[i]
@@ -125,6 +134,7 @@ class IDE {
     initObservers() {
         this.lastFragmentEnd = 0
         this.fragments = []
+
         this.keywordHighlightObserver = {
             notify: (tok, begin, end) => {
                 // console.log(`begin: ${begin},end: ${end}`)
@@ -166,27 +176,21 @@ class IDE {
     }
 
     getContent() {
-        return this.editor.innerText
-    }
-
-    _clearTextNodes(node) {
-        let childs = node.childNodes
-        for (let i = 0; i < childs.length; i++) {
-            // 循环到文本或空子节点就删除
-            let c = childs[i]
-            if (c.nodeName === "#text" && !/\s/.test(c.nodeValue)) {
-                node.removeChild(c)
-            }
+        let content = this.editor.innerText
+        let len = content.length
+        let pos = 0
+        let index = content.indexOf("\n\n", pos)
+        while(index >= 0 && pos < len) {
+            content = content.substring(0, index+1) + content.substring(index+2)
+            pos = index + 1
+            index = content.indexOf("\n\n", pos)
         }
+        return content
     }
 
     render_content() {
         let content = this.fragments.join("")
-        // let contentDiv = `
-        //   <p class="ide_rendered_content">${content}</p>
-        // `
-        // this._clearTextNodes(this.editor)
-        this.console.innerHTML = content
+        this.display.innerHTML = content
         this.fragments = []
     }
 
@@ -202,8 +206,12 @@ class IDE {
         this.input.updateCode(code)
         const ast = this.parser.parse_toplevel()
         const glob_env = new Environment()
+        // 添加全局程序库库
+        glob_env.vars.println = (txt) => {
+            this.console.innerText += `\n${txt}`
+        }
         const result = evaluate(ast, glob_env)
-        console.log(result)
+        this.console.innerText += `\n程序运行结果: ${result}`
     }
 }
 

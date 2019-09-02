@@ -1,46 +1,110 @@
 * {
-  margin: 0px;
-  padding: 0px;
+    margin: 0px;
+    padding: 0px;
 }
+
 #root {
-  position: relative;
+    position: relative;
 }
+
 #ide {
-  .ide_title {
-    text-align: center;
-    padding: 20px;
-  }
-  .ide_editor, .ide_console {
-    display: inline-block;
-    vertical-align: top;
-    width: 40%;
-    height: 500px;
-    margin-left: 5%;
-    border: 1px solid grey;
-  }
-  .ide_console {
-    font-size: 0px;
-    span {
-      font-size: 18px;
+    width: 100%;
+    .ide_header {
+        height: 5vh;
+        background: rgb(237, 237, 237);
+        .ide_title {
+            display: inline-block;
+            height: 5vh;
+            line-height: 5vh;
+            margin-left: 3vw;
+            text-align: center;
+        }
+
+        .ide_button {
+            display: inline-block;
+            width: 5vw;
+            height: 3vh;
+            line-height: 3vh;
+            vertical-align: top;
+
+            margin: {
+                left: 3vw;
+                top: 1vh;
+            }
+
+            background: rgb(235, 243, 255);
+            color: #000;
+            font-size: 15px;
+            text-align: center;
+            outline: none;
+            border: 1px solid grey;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .ide_button:hover {
+            background: rgb(245, 249, 255);
+        }
+
     }
-  }
-  .popup-tip {
-    width: 200px;
-    height: 100px;
-    position: absolute;
-    background: "#555";
-    border: 1px solid black;
-  }
-  .ide_button {
-    width: 100px;
-    height: 50px;
-    margin: {
-      left: 4%;
-      top: 20px;
+    .ide_main {
+        overflow: hidden;
+        height: 80vh;
+        .ide_editor,
+        .ide_display {
+            box-sizing: border-box;
+            padding: 10px;
+            float: left;
+            width: 50vw;
+            height: 100%;
+            font-size: 20px;
+        }
+
+        .ide_display {
+            font-size: 0;
+            background: rgb(247, 247, 247);
+            span {
+                font-size: 20px;
+            }
+        }
+
     }
-    background: blue;
-    color: white;
-    font-size: 15px;
-  }
-  
+
+    .ide_console_wrapper {
+        height: 15vh;
+        font-size: 15px;
+        background: rgb(237, 237, 237);
+        .ide_console_title {
+            box-sizing: border-box;
+            height: 5vh;
+            line-height: 5vh;
+            padding-left: 2vw;
+            border-bottom: 1px solid grey;
+        }
+        .ide_console {
+            height: 10vh;
+            padding-left: 2vw;
+            overflow: auto;
+        }
+    }
+
+    .popup-tip {
+        width: 200px;
+        height: 100px;
+        position: absolute;
+        border: 1px solid black;
+        .popup-title {
+            box-sizing: border-box;
+            height: 30px;
+            padding: 0 5px;
+            background: rgb(235, 243, 255);
+        }
+        .popup-content {
+            box-sizing: border-box;
+            height: 70px;
+            padding: 5px;
+            background: #fff;
+            overflow: auto;
+        }
+    }
+
 }

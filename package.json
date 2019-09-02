@@ -14,8 +14,8 @@
   },
   "main": "src/index.js",
   "scripts": {
-    "start": "webpack-dev-server --config conf/webpack.dev.js",
-    "build": "webpack --config conf/webpack.prod.js",
+    "start": "webpack-dev-server --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js",
     "lint": "eslint ./src/**.js",
     "coverage": "jest --coverage --config=conf/jest.config.js",
     "test": "jest --config=conf/jest.config.js",

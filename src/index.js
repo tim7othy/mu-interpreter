@@ -25,6 +25,6 @@ import './index.scss';
 //     console.log(lexer.next())
 // }
 
-new IDE();
+window.ide = new IDE();
 
 
