@@ -62,9 +62,18 @@ class IDE {
             this.console.innerText = ""
             this.compile()
         })
-        window.addEventListener("keyup", (ev) => {
-            this.lexing()
-        })
+		let debounce = (func, delay) => {
+			let timer = null
+			return () => {
+				if (timer) clearTimeout(timer)
+				timer = setTimeout(() => {
+					func.call(this)
+				}, delay)
+
+			}
+		}
+		let timer = null
+        window.addEventListener("keyup", debounce(() => this.lexing(), 200))
         this.display.addEventListener("mouseover", (ev) => {
             let t = ev.target
             // console.log(`target: ${t.tagName}`)
